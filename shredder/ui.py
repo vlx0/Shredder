@@ -22,8 +22,8 @@ class ShredderApp(tk.Tk):
     def __init__(self) -> None:
         super().__init__()
         self.title(f"Shredder {__version__}")
-        self.geometry("420x320")
-        self.minsize(380, 300)
+        self.geometry("420x360")
+        self.minsize(380, 340)
         self.configure(bg=BG)
         self.resizable(False, False)
         self._paths: list[Path] = []
@@ -124,30 +124,46 @@ class ShredderApp(tk.Tk):
             return
 
         passes = self._passes_value()
+        n = len(self._paths)
+        if n == 1:
+            what = str(self._paths[0])
+            if len(what) > 54:
+                what = "…" + what[-53:]
+        else:
+            what = f"{n} объект(ов)"
+
         overlay = tk.Frame(self, bg="#000000")
         overlay.place(relx=0, rely=0, relwidth=1, relheight=1)
-        box = tk.Frame(overlay, bg="#1a1a1a", padx=20, pady=16)
-        box.place(relx=0.5, rely=0.5, anchor="center")
-        tk.Label(box, text="Уничтожить безвозвратно?", bg="#1a1a1a", fg=FG, font=("Segoe UI Semibold", 11)).pack()
+        box = tk.Frame(overlay, bg="#1a1a1a", padx=22, pady=18)
+        box.place(relx=0.5, rely=0.5, anchor="center", relwidth=0.92)
+
+        tk.Label(box, text="Подтверждение", bg="#1a1a1a", fg=FG, font=("Segoe UI Semibold", 13)).pack(anchor="w")
+        tk.Label(box, text=what, bg="#1a1a1a", fg=MUTED, font=("Segoe UI", 9), wraplength=340, justify="left").pack(
+            anchor="w", pady=(6, 10)
+        )
+
+        warnings = (
+            f"• данные будут перезаписаны {passes} раз(а) случайными байтами\n"
+            "• затем файлы удалятся навсегда\n"
+            "• в Корзину они НЕ попадут\n"
+            "• восстановить обычными программами будет нельзя\n"
+            "• отменить действие после старта невозможно"
+        )
         tk.Label(
             box,
-            text=f"{len(self._paths)} объект(ов), {passes} раз(а)",
+            text=warnings,
             bg="#1a1a1a",
-            fg=MUTED,
+            fg=ERR,
             font=("Segoe UI", 9),
-        ).pack(pady=(6, 14))
-        row = tk.Frame(box, bg="#1a1a1a")
-        row.pack()
+            justify="left",
+            anchor="w",
+        ).pack(anchor="w", fill="x", pady=(0, 14))
 
-        def cancel():
-            overlay.destroy()
+        self._mk_btn(box, "Подтвердить", lambda: (overlay.destroy(), self._run(passes)), primary=True, big=True).pack(
+            fill="x"
+        )
+        self._mk_btn(box, "Отмена", overlay.destroy).pack(fill="x", pady=(8, 0))
 
-        def ok():
-            overlay.destroy()
-            self._run(passes)
-
-        self._mk_btn(row, "Отмена", cancel).pack(side="left", padx=4)
-        self._mk_btn(row, "Да", ok, primary=True).pack(side="left", padx=4)
 
     def _run(self, passes: int) -> None:
         self._busy = True
