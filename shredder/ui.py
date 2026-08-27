@@ -22,8 +22,8 @@ class ShredderApp(tk.Tk):
     def __init__(self) -> None:
         super().__init__()
         self.title(f"Shredder {__version__}")
-        self.geometry("420x280")
-        self.minsize(380, 260)
+        self.geometry("420x320")
+        self.minsize(380, 300)
         self.configure(bg=BG)
         self.resizable(False, False)
         self._paths: list[Path] = []
@@ -67,17 +67,17 @@ class ShredderApp(tk.Tk):
         self._status = tk.Label(pad, text="", bg=BG, fg=MUTED, font=("Segoe UI", 9), anchor="w")
         self._status.pack(fill="x", pady=(16, 8))
 
-        self._mk_btn(pad, "Уничтожить", self._shred, primary=True).pack(anchor="e")
+        self._mk_btn(pad, "Уничтожить", self._shred, primary=True, big=True).pack(fill="x", pady=(8, 0))
 
-    def _mk_btn(self, parent, text, cmd, primary=False) -> tk.Label:
+    def _mk_btn(self, parent, text, cmd, primary=False, big=False) -> tk.Label:
         lbl = tk.Label(
             parent,
             text=text,
             bg=FG if primary else "#1a1a1a",
             fg=BG if primary else FG,
-            font=("Segoe UI", 10),
-            padx=14,
-            pady=7,
+            font=("Segoe UI Semibold", 12) if big else ("Segoe UI", 10),
+            padx=28 if big else 14,
+            pady=14 if big else 7,
             cursor="hand2",
         )
         lbl.bind("<Button-1>", lambda _e: cmd())
